@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snake Game</title>
+<style>
+body {
+  background:#101820;
+  color:white;
+  text-align:center;
+  font-family:Arial;
+}
+canvas {
+  background:#182b35;  border:3px solid #00ff99;
+  width:min(90vw,400px);
+  height:auto;
+}
+button {
+  background:#00cc88;
+  color:black;
+  border:0;
+  padding:16px 24px;
+  margin:5px;
+  border-radius:12px;
+  font-size:20px;
+}
+</style>
+</head>
+<body>
+
+<h1>🐍 Snake Game</h1>
+<h2>Score: <span id="score">0</span></h2>
+
+<canvas id="game" width="400" height="400"></canvas>
+
+<div>
+<button onclick="move('up')">⬆️</button><br>
+<button onclick="move('left')">⬅️</button>
+<button onclick="move('down')">⬇️</button>
+<button onclick="move('right')">➡️</button>
+</div>
+
+<button onclick="restart()">Restart</button>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let snake, food, dx, dy, score, over;
+const size = 20;
+
+function restart() {
+  snake = [{x:200,y:200}];
+  food = {x:100,y:100};
+  dx = size;
+  dy = 0;
+  score = 0;
+  over = false;
+  document.getElementById("score").innerText = score;
+}
+
+function move(dir) {
+  if(dir==="up" && dy===0) {dx=0;dy=-size;}
+  if(dir==="down" && dy===0) {dx=0;dy=size;}
+  if(dir==="left" && dx===0) {dx=-size;dy=0;}
+  if(dir==="right" && dx===0) {dx=size;dy=0;}
+}
+
+document.addEventListener("keydown", e => {
+  if(e.key==="ArrowUp") move("up");
+  if(e.key==="ArrowDown") move("down");
+  if(e.key==="ArrowLeft") move("left");
+  if(e.key==="ArrowRight") move("right");
+});
+
+function randomFood() {
+  food = {
+    x:Math.floor(Math.random()*20)*size,
+    y:Math.floor(Math.random()*20)*size
+  };
+}
+
+function draw() {
+  if(over) {
+    ctx.fillStyle="white";
+    ctx.font="30px Arial";
+    ctx.fillText("GAME OVER",110,200);
+    return;
+  }
+
+  let head = {x:snake[0].x+dx,y:snake[0].y+dy};
+
+  if(head.x<0 || head.x>=400 ||
+     head.y<0 || head.y>=400 ||
+     snake.some(p=>p.x===head.x && p.y===head.y)) {
+    over=true;
+    return;
+  }
+
+  snake.unshift(head);
+
+  if(head.x===food.x && head.y===food.y) {
+    score+=10;
+    document.getElementById("score").innerText=score;
+    randomFood();
+  } else {
+    snake.pop();
+  }
+
+  ctx.fillStyle="#182b35";
+  ctx.fillRect(0,0,400,400);
+
+  ctx.fillStyle="red";
+  ctx.fillRect(food.x,food.y,size,size);
+
+  ctx.fillStyle="#00ff99";
+  snake.forEach(p=>ctx.fillRect(p.x,p.y,size-2,size-2));
+}
+
+let timer;
+function start() {
+  timer=setInterval(()=>{
+    if(!over) draw();
+  },130);
+}
+
+restart();
+start();
+</script>
+</body>
+</html>
+
